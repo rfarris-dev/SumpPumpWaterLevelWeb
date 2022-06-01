@@ -109,6 +109,37 @@ void led_control()
  server.send(200, "text/plane", state);
 }
 
+void getIPAddress() 
+{
+  String ipAddress = WiFi.localIP().toString().c_str();
+  Serial.print("IP address: ");
+  Serial.println(ipAddress);
+  server.send(200, "text/plane", ipAddress);
+
+  Serial.println();
+  Serial.print("MAC: ");
+  String macAddress = WiFi.macAddress();
+  Serial.println(macAddress);
+  server.send(200, "text/plane", macAddress); 
+}
+
+void getMACAddress() 
+{
+  Serial.println();
+  Serial.print("MAC: ");
+  String macAddress = WiFi.macAddress();
+  Serial.println(macAddress);
+  server.send(200, "text/plane", macAddress);
+}
+
+void getSsid() 
+{
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  server.send(200, "text/plane", ssid);
+}
+
 
 void setup(void)
 {
@@ -120,22 +151,29 @@ void setup(void)
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
+  
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print(".../n");
+    Serial.print("---\n");
   }
   
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+
+  //getSsid();
+  //getIPAddress();
+  //getMACAddress();
+
+
+
 
   server.on("/", handleRoot);
   server.on("/led_set", led_control);
   server.on("/readcm", sensor_data);
   server.on("/readin", sensor_dataInch);
   server.on("/pumphealth", sensor_pumpHealth);
+  server.on("/ipaddress", getIPAddress);
+  server.on("/macaddress", getMACAddress);
+  server.on("/ssid", getSsid);
+ 
   server.begin();
 
   pushTimer.start();  //first go at timer

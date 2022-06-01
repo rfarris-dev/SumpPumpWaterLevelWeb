@@ -13,7 +13,12 @@ const char webpage[] PROGMEM = R"=====(
   font-size: 16px;
 }
 
+#waterleveltable {
+}
 
+#waterleveltable td, #waterleveltable th {
+  font-size: 100px;
+}
 
 #healthtable {
   font-family: Arial, Helvetica, sans-serif;
@@ -59,17 +64,35 @@ tbody>tr>:nth-child(2){
 
 <table id="healthtable">
 <tr>
-  <td>Pump Health: </td>
+  <td>Water Level: </td>
   <td>
   <div>
     Distance (cm): <span id="distanceCm">0</span><br>
     Distance (inch): <span id="distanceInch">0</span><br>
   </div>
+  </td>
+</tr>
+
+<tr>
+  <td>Pump Health: </td>
+  <td>
   <div>
     <b><span id="pumpHealth"></b></span><br>
   </div>
   </td>
 </tr>
+
+<tr>
+  <td>Network: </td>
+  <td>
+  <div>
+    Wifi: <span id="ssid">0</span><br>
+    IP Address: <span id="ipAddress">0</span><br>
+    Mac Address: <span id="macAddress">0</span><br>
+  </div>
+  </td>
+</tr>
+
 <tr>
   <td>LED State:</td>
   <td>
@@ -81,6 +104,12 @@ tbody>tr>:nth-child(2){
   </td>
 </tr>
 
+</table>
+
+<br><br>
+
+<table id="waterleveltable">
+<tr><td>55%</td></tr>
 </table>
 
 <script>
@@ -99,6 +128,9 @@ function send(led_sts)
 
 setInterval(function() 
 {
+  getSsid()
+  getDataIPAddress();
+  getDataMACAddress();
   getData();
   getDataInch();
   getDataPumpHealth();
@@ -123,6 +155,17 @@ function getDataInch() {
       document.getElementById("distanceInch").innerHTML =
       this.responseText;
     }
+
+    if (parseFloat(this.responseText) <= 5) {
+      document.getElementById('waterleveltable').bgColor = '#00ACFC';
+    }
+
+    if (parseFloat(this.responseText) > 5) {
+      document.getElementById('waterleveltable').bgColor = '#FFFFFF';
+    }
+    
+
+    
   };
   xhttp.open("GET", "readin", true);
   xhttp.send();
@@ -139,6 +182,44 @@ function getDataPumpHealth() {
   xhttp.open("GET", "pumphealth", true);
   xhttp.send();
 }
+
+
+function getSsid() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("ssid").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "ssid", true);
+  xhttp.send();
+}
+
+function getDataIPAddress() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("ipAddress").innerHTML =
+      this.responseText;
+    } 
+  };
+  xhttp.open("GET", "ipaddress", true);
+  xhttp.send();
+}
+
+function getDataMACAddress() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("macAddress").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "macaddress", true);
+  xhttp.send();
+}
+
 
 </script>
 </left>
