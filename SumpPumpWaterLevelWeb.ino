@@ -19,6 +19,7 @@ const int echoPin = 14;
 long duration;
 float distanceCm;
 float distanceInch;
+int percentFilled;
 
 ESP8266WebServer server(80);
 Neotimer pushTimer = Neotimer(60000); // 60 second timer
@@ -66,7 +67,7 @@ void sensor_dataInch()
 
   if(pushTimer.done() && distanceInch <= 5)
   {
-    pushPumpNotification();
+    //pushPumpNotification();   Disable pushing for now.
     pushTimer.start();
   }
 
@@ -74,6 +75,18 @@ void sensor_dataInch()
   {
     Serial.println("Timer until next possible push.");
   }
+
+}
+
+void calcPercentFilled() 
+{
+
+  float distToCeil = 8*12;   
+
+  percentFilled = (1 - (distanceInch / distToCeil))*100;
+
+  server.send(200, "text/plane", String(percentFilled));
+
 
 }
 
@@ -169,6 +182,7 @@ void setup(void)
   server.on("/led_set", led_control);
   server.on("/readcm", sensor_data);
   server.on("/readin", sensor_dataInch);
+  server.on("/percentfilled", calcPercentFilled);
   server.on("/pumphealth", sensor_pumpHealth);
   server.on("/ipaddress", getIPAddress);
   server.on("/macaddress", getMACAddress);
