@@ -6,7 +6,6 @@
 
 #include "index.h"
 
-
 #define LED D0
 #define SOUND_VELOCITY 0.034
 
@@ -20,6 +19,9 @@ long duration;
 float distanceCm;
 float distanceInch;
 int percentFilled;
+
+float warningWaterLevelDistanceInches = 9.75;
+float emptyWaterLevelDistanceInches = 19;
 
 ESP8266WebServer server(80);
 Neotimer pushTimer = Neotimer(60000); // 60 second timer
@@ -55,19 +57,23 @@ void sensor_data()
   distanceCm = duration * SOUND_VELOCITY/2;
   
   server.send(200, "text/plane", String(distanceCm));
- 
 }
 
 void sensor_dataInch() 
 {
   // Convert to inches
   distanceInch = distanceCm * 0.393701;
+
+  if(distanceInch > emptyWaterLevelDistanceInches)
+  {
+    distanceInch = emptyWaterLevelDistanceInches; // Measurements above the maximum are erroneous.
+  }
   
   server.send(200, "text/plane", String(distanceInch));
 
-  if(pushTimer.done() && distanceInch <= 5)
+  if(pushTimer.done() && distanceInch <= warningWaterLevelDistanceInches)
   {
-    //pushPumpNotification();   Disable pushing for now.
+    pushPumpNotification();   // Disable pushing for now.
     pushTimer.start();
   }
 
@@ -75,19 +81,13 @@ void sensor_dataInch()
   {
     Serial.println("Timer until next possible push.");
   }
-
 }
 
 void calcPercentFilled() 
 {
-
-  float distToCeil = 8*12;   
-
-  percentFilled = (1 - (distanceInch / distToCeil))*100;
-
+  percentFilled = (1 - ((distanceInch - warningWaterLevelDistanceInches) / (emptyWaterLevelDistanceInches - warningWaterLevelDistanceInches))) * 100;
+  
   server.send(200, "text/plane", String(percentFilled));
-
-
 }
 
 
@@ -95,7 +95,7 @@ void sensor_pumpHealth()
 {
   String pumpHealth = "No issues detected.";
 
-  if (distanceInch <= 5)
+  if (distanceInch <= warningWaterLevelDistanceInches)
   {
     pumpHealth = "PUMP FAILURE! WATER LEVEL TOO HIGH!";
   }
@@ -171,9 +171,9 @@ void setup(void)
   }
   
 
-  //getSsid();
-  //getIPAddress();
-  //getMACAddress();
+  getSsid();
+  getIPAddress();
+  getMACAddress();
 
 
 

@@ -187,11 +187,15 @@ function getPercentFilled() {
       document.getElementById("percentFilled").innerHTML =
       this.responseText;
 
-      if (parseInt(this.responseText) >= 80) {
+      if (parseInt(this.responseText) >= 100) {
         document.getElementById('waterleveltable').bgColor = '#FF0000';
       }  
+	  
+	  else if ((parseInt(this.responseText) < 100) && (parseInt(this.responseText) > 80)) {
+        document.getElementById('waterleveltable').bgColor = '#FFFF00';
+      }
 
-      else if ((parseInt(this.responseText) < 80) && (parseInt(this.responseText) > 5)) {
+      else if ((parseInt(this.responseText) < 79) && (parseInt(this.responseText) > 5)) {
         document.getElementById('waterleveltable').bgColor = '#00ACFC';
       }
 
