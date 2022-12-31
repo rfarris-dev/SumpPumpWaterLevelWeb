@@ -61,10 +61,9 @@ tbody>tr>:nth-child(2){
 
 </style>
 
-<h2>Sump Pump Water Level Monitor</h2>
-
-
 <body style="background-color: #ffffff">
+
+<h2>Sump Pump Water Level Monitor</h2>
 
 <table id="healthtable">
 
@@ -126,8 +125,41 @@ tbody>tr>:nth-child(2){
     </div>
     </td>
   </tr>
-
 </table>
+
+<h2>Configuration</h2>
+
+<table id="healthtable">
+  <tr>
+      <th>Settings</th>
+  </tr>
+  <tr>
+    <td>
+    <div>
+	  <form action="/action_page">
+	  Sensor to Max Water Level Distance (in):<br>
+	  <input type="number" name="warningwaterleveldistanceinches" value="9.75">
+    </div>
+    </td>
+  </tr>
+  <tr>
+	<td>
+	<div>
+	  Sensor to Min Water Level Distance (in):<br>
+	  <input type="text" name="emptywaterleveldistanceinches" value="19">
+	</div>
+	</td>
+  </tr>
+  
+    <tr>
+	<td>
+	<div>
+	  <input type="submit" value="Submit">
+	  </form> 
+	</div>
+	</td>
+  </tr>
+  </table>
 
 <script>
 

@@ -20,8 +20,8 @@ float distanceCm;
 float distanceInch;
 int percentFilled;
 
-float warningWaterLevelDistanceInches = 9.75;
-float emptyWaterLevelDistanceInches = 19;
+float warningWaterLevelDistanceInches = 0;
+float emptyWaterLevelDistanceInches = 0;
 
 ESP8266WebServer server(80);
 Neotimer pushTimer = Neotimer(60000); // 60 second timer
@@ -34,10 +34,24 @@ WiFiClient client;
 Pushsafer pushsafer(PushsaferKey, client);
 
 void handleRoot() 
-
 {
  String s = webpage;
  server.send(200, "text/html", s);
+}
+
+void handleForm()
+{
+ warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
+ emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat(); 
+
+ Serial.print("Sensor to Max Water Level Distance (in): ");
+ Serial.println(warningWaterLevelDistanceInches);
+
+ Serial.print("Sensor to Min Water Level Distance (in):");
+ Serial.println(emptyWaterLevelDistanceInches);
+ 
+ String s = "<a href='/'> Go Back </a>";
+ server.send(200, "text/html", s); //Send web page
 }
 
 void sensor_data() 
@@ -73,7 +87,7 @@ void sensor_dataInch()
 
   if(pushTimer.done() && distanceInch <= warningWaterLevelDistanceInches)
   {
-    pushPumpNotification();   // Disable pushing for now.
+    //pushPumpNotification();   // Disable pushing for now.
     pushTimer.start();
   }
 
@@ -175,6 +189,7 @@ void setup(void)
   getMACAddress();
 
   server.on("/", handleRoot);
+  server.on("/action_page", handleForm); 
   server.on("/led_set", led_control);
   server.on("/readcm", sensor_data);
   server.on("/readin", sensor_dataInch);
@@ -185,7 +200,8 @@ void setup(void)
   server.on("/ssid", getSsid);
  
   server.begin();
-
+  Serial.println("HTTP server started");
+  
   pushTimer.start();  //first go at timer
 
 }
