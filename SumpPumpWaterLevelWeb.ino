@@ -170,13 +170,9 @@ void setup(void)
     Serial.print("---\n");
   }
   
-
   getSsid();
   getIPAddress();
   getMACAddress();
-
-
-
 
   server.on("/", handleRoot);
   server.on("/led_set", led_control);
@@ -194,7 +190,6 @@ void setup(void)
 
 }
 
-
 void loop(void)
 {
   server.handleClient();
@@ -206,7 +201,9 @@ void pushPumpNotification()
 
   // Take a look at the Pushsafer.com API at
   // https://www.pushsafer.com/en/pushapi
-  
+
+  // Note on TCL 10 Pro: For reliable pushing, you need to use ADBAppControl for Windows to remove TCL bloatware Smart Manager and Smart Push.
+
   struct PushSaferInput input;
   input.message = "Possible sump pump failure!!!!";
   input.title = "WARNING";
