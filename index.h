@@ -138,7 +138,7 @@ tbody>tr>:nth-child(2){
     <div>
 	  <form action="/action_page">
 	  Sensor to Max Water Level Distance (in):<br>
-	  <input type="number" name="warningwaterleveldistanceinches" value="9.75">
+	  <input type="text" name="warningwaterleveldistanceinches" value="9.75">
     </div>
     </td>
   </tr>

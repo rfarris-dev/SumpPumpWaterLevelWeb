@@ -1,3 +1,5 @@
+#include <EEPROM.h>
+
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -8,6 +10,8 @@
 
 #define LED D0
 #define SOUND_VELOCITY 0.034
+
+#define EEPROM_SIZE 12
 
 const char* ssid = "TreeRat";
 const char* password = "deadsquirrel";
@@ -20,8 +24,10 @@ float distanceCm;
 float distanceInch;
 int percentFilled;
 
-float warningWaterLevelDistanceInches = 0;
-float emptyWaterLevelDistanceInches = 0;
+float warningWaterLevelDistanceInches;
+float emptyWaterLevelDistanceInches;
+
+int boardId;
 
 ESP8266WebServer server(80);
 Neotimer pushTimer = Neotimer(60000); // 60 second timer
@@ -33,6 +39,55 @@ Neotimer pushTimer = Neotimer(60000); // 60 second timer
 WiFiClient client;
 Pushsafer pushsafer(PushsaferKey, client);
 
+void readEeprom() 
+{
+  //Read data from eeprom
+  Serial.println("----------EEPROM READ----------");
+  unsigned int address = 0;
+  int readBoardId;
+  EEPROM.get(address, readBoardId);
+  Serial.print("Read Board Id = ");
+  Serial.println(readBoardId);
+  
+  address += sizeof(readBoardId); //update address value
+
+  float readEmptyWaterLevelDistanceInches;
+  
+  EEPROM.get(address, readEmptyWaterLevelDistanceInches);
+  Serial.print("Sensor to Min Water Level Distance (in): ");
+  Serial.println(readEmptyWaterLevelDistanceInches);
+
+  address += sizeof(readEmptyWaterLevelDistanceInches); //update address value
+
+  float readWarningWaterLevelDistanceInches;
+  
+  EEPROM.get(address, readWarningWaterLevelDistanceInches);
+  Serial.print("Sensor to Max Water Level Distance (in): ");
+  Serial.println(readWarningWaterLevelDistanceInches);
+  Serial.println("");
+
+  boardId = readBoardId;
+  emptyWaterLevelDistanceInches = readEmptyWaterLevelDistanceInches;
+  warningWaterLevelDistanceInches = readWarningWaterLevelDistanceInches;
+}
+
+void writeEeprom()
+{
+  //Write data into eeprom
+  unsigned int address = 0;
+  boardId = 1000;
+  EEPROM.put(address, boardId);
+
+  address += sizeof(boardId); //update address value
+  EEPROM.put(address, emptyWaterLevelDistanceInches);
+
+  address += sizeof(warningWaterLevelDistanceInches); //update address value
+  EEPROM.put(address, warningWaterLevelDistanceInches);
+  
+  EEPROM.commit();
+  
+}
+
 void handleRoot() 
 {
  String s = webpage;
@@ -41,17 +96,25 @@ void handleRoot()
 
 void handleForm()
 {
+ readEeprom();
  warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
- emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat(); 
+ emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat();
 
- Serial.print("Sensor to Max Water Level Distance (in): ");
- Serial.println(warningWaterLevelDistanceInches);
+ Serial.println("----------WEB FORM HANDLER----------");
 
- Serial.print("Sensor to Min Water Level Distance (in):");
+ Serial.print("Sensor to Min Water Level Distance (in): ");
  Serial.println(emptyWaterLevelDistanceInches);
  
+ Serial.print("Sensor to Max Water Level Distance (in): ");
+ Serial.println(warningWaterLevelDistanceInches);
+ Serial.println("");
+
+ writeEeprom();
+ readEeprom();
+
  String s = "<a href='/'> Go Back </a>";
  server.send(200, "text/html", s); //Send web page
+
 }
 
 void sensor_data() 
@@ -171,6 +234,13 @@ void getSsid()
 void setup(void)
 {
   Serial.begin(115200);
+
+  Serial.println(F("Initialize EEPROM"));
+  //Init EEPROM
+  EEPROM.begin(EEPROM_SIZE);
+
+  readEeprom();
+  
   WiFi.begin(ssid, password);
   Serial.println("");
   
