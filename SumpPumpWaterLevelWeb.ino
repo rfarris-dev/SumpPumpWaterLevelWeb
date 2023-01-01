@@ -39,7 +39,7 @@ Neotimer pushTimer = Neotimer(60000); // 60 second timer
 WiFiClient client;
 Pushsafer pushsafer(PushsaferKey, client);
 
-void readEeprom() 
+void readEepromBoardId() 
 {
   //Read data from eeprom
   Serial.println("----------EEPROM READ----------");
@@ -51,11 +51,25 @@ void readEeprom()
   
   address += sizeof(readBoardId); //update address value
 
+  server.send(200, "text/plane", String(readBoardId));
+  
+  boardId = readBoardId;
+
+}
+
+void readEepromWarningWaterLevelDistanceInches()
+{
+  //Read data from eeprom
+  Serial.println("----------EEPROM READ----------");
+  unsigned int address = 0;
+  int readBoardId;
+  EEPROM.get(address, readBoardId);
+
+  address += sizeof(readBoardId); //update address value
+
   float readEmptyWaterLevelDistanceInches;
   
   EEPROM.get(address, readEmptyWaterLevelDistanceInches);
-  Serial.print("Sensor to Min Water Level Distance (in): ");
-  Serial.println(readEmptyWaterLevelDistanceInches);
 
   address += sizeof(readEmptyWaterLevelDistanceInches); //update address value
 
@@ -66,9 +80,33 @@ void readEeprom()
   Serial.println(readWarningWaterLevelDistanceInches);
   Serial.println("");
 
-  boardId = readBoardId;
-  emptyWaterLevelDistanceInches = readEmptyWaterLevelDistanceInches;
+  server.send(200, "text/plane", String(readWarningWaterLevelDistanceInches));
+  
   warningWaterLevelDistanceInches = readWarningWaterLevelDistanceInches;
+}
+
+
+void readEepromEmptyWaterLevelDistanceInches()
+{
+  //Read data from eeprom
+  Serial.println("----------EEPROM READ----------");
+  unsigned int address = 0;
+  int readBoardId;
+  EEPROM.get(address, readBoardId);
+  
+  address += sizeof(readBoardId); //update address value
+
+  float readEmptyWaterLevelDistanceInches;
+  
+  EEPROM.get(address, readEmptyWaterLevelDistanceInches);
+  Serial.print("Sensor to Min Water Level Distance (in): ");
+  Serial.println(readEmptyWaterLevelDistanceInches);
+  Serial.println("");
+
+  server.send(200, "text/plane", String(readEmptyWaterLevelDistanceInches));
+  
+  emptyWaterLevelDistanceInches = readEmptyWaterLevelDistanceInches;
+  
 }
 
 void writeEeprom()
@@ -96,7 +134,11 @@ void handleRoot()
 
 void handleForm()
 {
- readEeprom();
+ readEepromBoardId();
+ readEepromEmptyWaterLevelDistanceInches();
+ readEepromWarningWaterLevelDistanceInches();
+ 
+ boardId = (server.arg("boardid")).toFloat(); 
  warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
  emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat();
 
@@ -110,7 +152,11 @@ void handleForm()
  Serial.println("");
 
  writeEeprom();
- readEeprom();
+
+ 
+ //readEepromBoardId();
+ //readEepromEmptyWaterLevelDistanceInches();
+ //readEepromWarningWaterLevelDistanceInches();
 
  String s = "<a href='/'> Go Back </a>";
  server.send(200, "text/html", s); //Send web page
@@ -238,8 +284,6 @@ void setup(void)
   Serial.println(F("Initialize EEPROM"));
   //Init EEPROM
   EEPROM.begin(EEPROM_SIZE);
-
-  readEeprom();
   
   WiFi.begin(ssid, password);
   Serial.println("");
@@ -258,6 +302,10 @@ void setup(void)
   getIPAddress();
   getMACAddress();
 
+  readEepromBoardId();
+  readEepromEmptyWaterLevelDistanceInches();
+  readEepromWarningWaterLevelDistanceInches();
+
   server.on("/", handleRoot);
   server.on("/action_page", handleForm); 
   server.on("/led_set", led_control);
@@ -268,6 +316,10 @@ void setup(void)
   server.on("/ipaddress", getIPAddress);
   server.on("/macaddress", getMACAddress);
   server.on("/ssid", getSsid);
+  server.on("/boardid", readEepromBoardId);
+  server.on("/emptywaterleveldistanceinches", readEepromEmptyWaterLevelDistanceInches);
+  server.on("/warningwaterleveldistanceinches", readEepromWarningWaterLevelDistanceInches);
+
  
   server.begin();
   Serial.println("HTTP server started");

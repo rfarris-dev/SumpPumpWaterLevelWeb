@@ -131,22 +131,22 @@ tbody>tr>:nth-child(2){
 
 <table id="healthtable">
   <tr>
-      <th>Settings</th>
+      <th>Settings in EEPROM for BoardId: <span id="boardId">0</span></th>
   </tr>
   <tr>
     <td>
     <div>
-	  <form action="/action_page">
-	  Sensor to Max Water Level Distance (in):<br>
-	  <input type="text" name="warningwaterleveldistanceinches" value="9.75">
+	 <form  name="eepromForm" action="/action_page">
+	 Sensor to min water level distance is set to <span id="emptyWaterLevelDistanceInches">0</span> inches<br>
+	 <input type="text" name="emptywaterleveldistanceinches" value="">
     </div>
     </td>
   </tr>
   <tr>
 	<td>
 	<div>
-	  Sensor to Min Water Level Distance (in):<br>
-	  <input type="text" name="emptywaterleveldistanceinches" value="19">
+	  Sensor to max water level distance is set to <span id="warningWaterLevelDistanceInches">0</span> inches<br>
+	  <input type="text" name="warningwaterleveldistanceinches" value="">
 	</div>
 	</td>
   </tr>
@@ -154,14 +154,21 @@ tbody>tr>:nth-child(2){
     <tr>
 	<td>
 	<div>
-	  <input type="submit" value="Submit">
-	  </form> 
+	  <input type="submit" value="Write Settings">
+	  </form>
+	  <button class="button" onclick="readButton()">Read Settings</button>
 	</div>
 	</td>
   </tr>
   </table>
 
 <script>
+
+
+function readButton() {
+	document.forms['eepromForm']['emptywaterleveldistanceinches'].value = document.getElementById("emptyWaterLevelDistanceInches").innerHTML;
+	document.forms['eepromForm']['warningwaterleveldistanceinches'].value = document.getElementById("warningWaterLevelDistanceInches").innerHTML;
+}
 
 function send(led_sts) 
 {
@@ -184,6 +191,9 @@ setInterval(function()
   getDataInch();  
   getPercentFilled();
   getDataPumpHealth();
+  getSensorToMinWaterLevelInches()
+  getSensorToMaxWaterLevelInches()
+  getBoardId();
 }, 500); 
 
 function getData() {
@@ -286,6 +296,42 @@ function getDataMACAddress() {
     }
   };
   xhttp.open("GET", "macaddress", true);
+  xhttp.send();
+}
+
+function getBoardId() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("boardId").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "boardid", true);
+  xhttp.send();
+}
+
+function getSensorToMinWaterLevelInches() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("emptyWaterLevelDistanceInches").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "emptywaterleveldistanceinches", true);
+  xhttp.send();
+}
+
+function getSensorToMaxWaterLevelInches() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("warningWaterLevelDistanceInches").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "warningwaterleveldistanceinches", true);
   xhttp.send();
 }
 
