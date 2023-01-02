@@ -40,13 +40,47 @@ const char webpage[] PROGMEM = R"=====(
   color: white;
 }
 
-tbody>tr>:nth-child(1){
+#healthtable tbody>tr>:nth-child(3){
  width:100px;
  text-align:left;
 }
 
-tbody>tr>:nth-child(2){
+#healthtable tbody>tr>:nth-child(4){
  width:450px;
+ text-align:left;
+}
+
+#configtable {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 500px;
+}
+
+#configtable td, #healthtable th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#configtable tr:nth-child(even){background-color: #f2f2f2;}
+
+#configtable tr:hover {background-color: #ddd;}
+
+#configtable th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #00ACFC;
+  color: white;
+}
+
+#configtable tbody>tr>:nth-child(1){
+ width:350px;
+ text-align:left;
+}
+
+#configtable tbody>tr>:nth-child(2){
+ width:150px;
  text-align:left;
 }
 
@@ -68,20 +102,19 @@ tbody>tr>:nth-child(2){
     <td>
     <div>
       <table id="waterleveltable">
-      <tr><td><span id="percentFilled">0</span>%<br></td></tr>
+      <tr><td><span id="percentFilled">-</span>%<br></td></tr>
       </table>
     </div>
     </td>
   </tr>
   
   
-  
   <tr>
     <td>Water Level: </td>
     <td>
     <div>
-      Distance (cm): <span id="distanceCm">0</span><br>
-      Distance (inch): <span id="distanceInch">0</span><br>
+      Distance (cm): <span id="distanceCm">-</span><br>
+      Distance (inch): <span id="distanceInch">-</span><br>
     </div>
     </td>
   </tr>
@@ -99,9 +132,9 @@ tbody>tr>:nth-child(2){
     <td>Network: </td>
     <td>
     <div>
-      Wifi: <span id="ssid">0</span><br>
-      IP Address: <span id="ipAddress">0</span><br>
-      Mac Address: <span id="macAddress">0</span><br>
+      Wifi: <span id="ssid">-</span><br>
+      IP Address: <span id="ipAddress">-</span><br>
+      Mac Address: <span id="macAddress">-</span><br>
     </div>
     </td>
   </tr>
@@ -118,36 +151,63 @@ tbody>tr>:nth-child(2){
   </tr>
 </table>
 
+<br>
+
 <h2>Configuration</h2>
 
-<table id="healthtable">
+<table id="configtable">
   <tr>
-      <th>Settings in EEPROM for Board ID: <span id="boardId">0</span></th>
+      <th>Board ID: <span id="boardId">-</span></th>
+	  <th>Update</th>
   </tr>
   <tr>
     <td>
     <div>
-	 <form  name="eepromForm" action="/action_page">
-	 Sensor to min water level distance is set to <span id="emptyWaterLevelDistanceInches">0</span> inches<br>
-	 <input type="text" name="emptywaterleveldistanceinches" value="">
+	  <form  name="eepromForm" action="/action_page">
+	   Sensor to min water level distance (in): <b><span id="emptyWaterLevelDistanceInches">-</span></b>
     </div>
     </td>
+	<td>
+	<div>
+	  <input type="text" size="8" name="emptywaterleveldistanceinches" value="">
+	</div>
+	</td>
   </tr>
   <tr>
 	<td>
 	<div>
-	  Sensor to max water level distance is set to <span id="warningWaterLevelDistanceInches">0</span> inches<br>
-	  <input type="text" name="warningwaterleveldistanceinches" value="">
+	  Sensor to max water level distance (in): <b><span id="warningWaterLevelDistanceInches">-</span></b>
+	</div>
+	</td>
+	<td>
+	<div>
+	  <input type="text" size="8" name="warningwaterleveldistanceinches" value="">
+	</div>
+	</td>
+  </tr>
+  <tr>
+	<td>
+	<div>
+	  LED state after power up: <b><span id="boardLedOn">-</span></b>
+	</div>
+	</td>
+    <td>
+	<div>
+	  <select style="width: 90px;" name="boardledon">
+	  <option value="0">LED On</option>
+      <option value="1">LED Off</option>
 	</div>
 	</td>
   </tr>
   
-    <tr>
+  <tr>
 	<td>
-	<div align="right">
-	  <input class="button" type="submit" value="Write Settings">
+	</td>
+	<td>
+	  <div align="left">
+	  <input class="button" type="submit" value="Write">
 	  </form>
-	  <button class="button" id="readsettingsbutton" onclick="readButton()">Read Settings</button>
+	  <button class="button" id="readsettingsbutton" onclick="readButton()">Read</button>
 	</div>
 	</td>
   </tr>
@@ -158,6 +218,7 @@ tbody>tr>:nth-child(2){
 function readButton() {
 	document.forms['eepromForm']['emptywaterleveldistanceinches'].value = document.getElementById("emptyWaterLevelDistanceInches").innerHTML;
 	document.forms['eepromForm']['warningwaterleveldistanceinches'].value = document.getElementById("warningWaterLevelDistanceInches").innerHTML;
+	document.forms['eepromForm']['boardledon'].value = document.getElementById("boardLedOn").innerHTML;
 }
 
 function send(led_sts) 
@@ -184,12 +245,13 @@ setInterval(function()
   getBoardId();
   getSensorToMinWaterLevelInches();
   getSensorToMaxWaterLevelInches();
-}, 1000); 
+  getBoardLedOn();
+}, 500); 
 
 setTimeout(function() 
 {
   readButton();
-}, 1200); 
+}, 1100); 
 
 
 function getData() {
@@ -328,6 +390,18 @@ function getSensorToMaxWaterLevelInches() {
     }
   };
   xhttp.open("GET", "warningwaterleveldistanceinches", true);
+  xhttp.send();
+}
+
+function getBoardLedOn() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("boardLedOn").innerHTML =
+      this.responseText;
+    }
+  };
+  xhttp.open("GET", "boardledon", true);
   xhttp.send();
 }
 
