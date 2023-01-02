@@ -2,16 +2,7 @@ const char webpage[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
 <style type="text/css">
-.button {
-  background-color: #00ACFC;
-  border: none;
-  color: white;
-  padding: 3.75px 8px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-}
+<!-- HTML !-->
 
 #waterleveltable {
   table-layout: fixed;
@@ -131,7 +122,7 @@ tbody>tr>:nth-child(2){
 
 <table id="healthtable">
   <tr>
-      <th>Settings in EEPROM for BoardId: <span id="boardId">0</span></th>
+      <th>Settings in EEPROM for Board ID: <span id="boardId">0</span></th>
   </tr>
   <tr>
     <td>
@@ -153,17 +144,16 @@ tbody>tr>:nth-child(2){
   
     <tr>
 	<td>
-	<div>
-	  <input type="submit" value="Write Settings">
+	<div align="right">
+	  <input class="button" type="submit" value="Write Settings">
 	  </form>
-	  <button class="button" onclick="readButton()">Read Settings</button>
+	  <button class="button" id="readsettingsbutton" onclick="readButton()">Read Settings</button>
 	</div>
 	</td>
   </tr>
   </table>
 
-<script>
-
+<script> 
 
 function readButton() {
 	document.forms['eepromForm']['emptywaterleveldistanceinches'].value = document.getElementById("emptyWaterLevelDistanceInches").innerHTML;
@@ -191,10 +181,16 @@ setInterval(function()
   getDataInch();  
   getPercentFilled();
   getDataPumpHealth();
-  getSensorToMinWaterLevelInches()
-  getSensorToMaxWaterLevelInches()
   getBoardId();
-}, 500); 
+  getSensorToMinWaterLevelInches();
+  getSensorToMaxWaterLevelInches();
+}, 1000); 
+
+setTimeout(function() 
+{
+  readButton();
+}, 1200); 
+
 
 function getData() {
   var xhttp = new XMLHttpRequest();

@@ -134,33 +134,27 @@ void handleRoot()
 
 void handleForm()
 {
- readEepromBoardId();
- readEepromEmptyWaterLevelDistanceInches();
- readEepromWarningWaterLevelDistanceInches();
- 
- boardId = (server.arg("boardid")).toFloat(); 
- warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
- emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat();
-
- Serial.println("----------WEB FORM HANDLER----------");
-
- Serial.print("Sensor to Min Water Level Distance (in): ");
- Serial.println(emptyWaterLevelDistanceInches);
- 
- Serial.print("Sensor to Max Water Level Distance (in): ");
- Serial.println(warningWaterLevelDistanceInches);
- Serial.println("");
-
- writeEeprom();
-
- 
- //readEepromBoardId();
- //readEepromEmptyWaterLevelDistanceInches();
- //readEepromWarningWaterLevelDistanceInches();
-
- String s = "<a href='/'> Go Back </a>";
- server.send(200, "text/html", s); //Send web page
-
+  String s = "<script>window.location = '/'</script>";  // Back to main page after writing.
+  server.send(200, "text/html", s); //Send web page 
+  
+  readEepromBoardId();
+  readEepromEmptyWaterLevelDistanceInches();
+  readEepromWarningWaterLevelDistanceInches();
+  
+  boardId = (server.arg("boardid")).toFloat(); 
+  warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
+  emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat();
+  
+  Serial.println("----------WEB FORM HANDLER----------");
+  
+  Serial.print("Sensor to Min Water Level Distance (in): ");
+  Serial.println(emptyWaterLevelDistanceInches);
+  
+  Serial.print("Sensor to Max Water Level Distance (in): ");
+  Serial.println(warningWaterLevelDistanceInches);
+  Serial.println("");
+  
+  writeEeprom();
 }
 
 void sensor_data() 
