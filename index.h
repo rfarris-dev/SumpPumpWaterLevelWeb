@@ -143,9 +143,8 @@ const char webpage[] PROGMEM = R"=====(
     <td>LED State:</td>
     <td>
     <div>
-      Currently <b><span id="state">NA</span></b><br>
       <button class="button" onclick="send(1)">LED OFF</button>
-      <button class="button" onclick="send(0)">LED ON</button><BR>
+      <button class="button" onclick="send(0)">LED ON</button> <b><span id="state"></span></b>
     </div>
     </td>
   </tr>
@@ -251,7 +250,7 @@ setInterval(function()
 setTimeout(function() 
 {
   readButton();
-}, 1100); 
+}, 1300); 
 
 
 function getData() {

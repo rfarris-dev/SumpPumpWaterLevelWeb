@@ -28,7 +28,7 @@ float warningWaterLevelDistanceInches;
 float emptyWaterLevelDistanceInches;
 
 int boardId;
-int boardLedOn = LOW;  //On
+int boardLedOn;
 
 ESP8266WebServer server(80);
 Neotimer pushTimer = Neotimer(60000); // 60 second timer
@@ -219,21 +219,20 @@ void sensor_pumpHealth()
 
 void led_control() 
 {
- String state = "OFF";
- String act_state = server.arg("state");
- if(act_state == "1")
- {
-  digitalWrite(LED,HIGH); //LED OFF
-  state = "OFF";
- }
-
- else
- {
-  digitalWrite(LED,LOW); //LED ON (Active Low)
-  state = "ON";
- }
- 
- server.send(200, "text/plane", state);
+  String state = "(OFF)";
+  String act_state = server.arg("state");
+  
+  if(act_state == "1")
+  {
+    digitalWrite(LED,HIGH); //LED OFF
+    state = "(OFF)";
+  }
+  else
+  {
+    digitalWrite(LED,LOW); //LED ON (Active Low)
+    state = "(ON)";
+  }
+  server.send(200, "text/plane", state);
 }
 
 void getIPAddress() 
@@ -242,12 +241,6 @@ void getIPAddress()
   Serial.print("IP address: ");
   Serial.println(ipAddress);
   server.send(200, "text/plane", ipAddress);
-
-  Serial.println();
-  Serial.print("MAC: ");
-  String macAddress = WiFi.macAddress();
-  Serial.println(macAddress);
-  server.send(200, "text/plane", macAddress); 
 }
 
 void getMACAddress() 
@@ -267,7 +260,6 @@ void getSsid()
   server.send(200, "text/plane", ssid);
 }
 
-
 void setup(void)
 {
   Serial.begin(115200);
@@ -283,7 +275,6 @@ void setup(void)
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
-  
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print("---\n");
@@ -315,6 +306,15 @@ void setup(void)
   server.on("/warningwaterleveldistanceinches", readEepromWarningWaterLevelDistanceInches);
   server.on("/boardledon", readEepromBoardLedOn);
 
+  // Set Onboard LED on/off depending on user EEPROM setting
+  if (boardLedOn == 1)
+  {
+    digitalWrite(LED,HIGH); //LED OFF
+  }
+  else
+  {
+    digitalWrite(LED,LOW); //LED ON
+  }
  
   server.begin();
   Serial.println("HTTP server started");
