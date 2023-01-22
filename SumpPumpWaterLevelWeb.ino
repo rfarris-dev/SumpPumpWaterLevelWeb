@@ -42,72 +42,39 @@ Pushsafer pushsafer(PushsaferKey, client);
 
 void readEepromBoardId() 
 {
-  //Read data from eeprom
-  Serial.println("----------EEPROM READ----------");
   int readBoardId;
   EEPROM.get(0, readBoardId);
-  Serial.print("Read Board Id = ");
-  Serial.println(readBoardId);
-
   server.send(200, "text/plane", String(readBoardId));
-  
   boardId = readBoardId;
-
 }
 
 void readEepromEmptyWaterLevelDistanceInches()
 {
-  //Read data from eeprom
-  Serial.println("----------EEPROM READ----------");
   float readEmptyWaterLevelDistanceInches;
-  
   EEPROM.get(2, readEmptyWaterLevelDistanceInches);
-  Serial.print("Sensor to Min Water Level Distance (in): ");
-  Serial.println(readEmptyWaterLevelDistanceInches);
-  Serial.println("");
-
   server.send(200, "text/plane", String(readEmptyWaterLevelDistanceInches));
-  
   emptyWaterLevelDistanceInches = readEmptyWaterLevelDistanceInches;
 }
 
 void readEepromWarningWaterLevelDistanceInches()
 {
-  //Read data from eeprom
-  Serial.println("----------EEPROM READ----------");
   float readWarningWaterLevelDistanceInches;
-  
   EEPROM.get(6, readWarningWaterLevelDistanceInches);
-  Serial.print("Sensor to Max Water Level Distance (in): ");
-  Serial.println(readWarningWaterLevelDistanceInches);
-  Serial.println("");
-
   server.send(200, "text/plane", String(readWarningWaterLevelDistanceInches));
-  
   warningWaterLevelDistanceInches = readWarningWaterLevelDistanceInches;
 }
 
 
 void readEepromBoardLedOn()
 {
-  //Read data from eeprom
-  Serial.println("----------EEPROM READ----------");
-  
   int readBoardLedOn;
   EEPROM.get(10, readBoardLedOn);
-  
-  Serial.print("Onboard LED: ");
-  Serial.println(readBoardLedOn);
-  Serial.println("");
-
   server.send(200, "text/plane", String(readBoardLedOn));
-  
   boardLedOn = readBoardLedOn;
 }
 
 void writeEeprom()
 {
-  //Write data into eeprom
   boardId = 1001;
   EEPROM.put(0, boardId);
   EEPROM.put(2, emptyWaterLevelDistanceInches);
@@ -136,20 +103,6 @@ void handleForm()
   warningWaterLevelDistanceInches = (server.arg("warningwaterleveldistanceinches")).toFloat(); 
   emptyWaterLevelDistanceInches  = (server.arg("emptywaterleveldistanceinches")).toFloat();
   boardLedOn  = (server.arg("boardledon")).toInt();
-  
-  Serial.println("----------WEB FORM HANDLER----------");
-  
-  Serial.print("Sensor to Min Water Level Distance (in): ");
-  Serial.println(emptyWaterLevelDistanceInches);
-  
-  Serial.print("Sensor to Max Water Level Distance (in): ");
-  Serial.println(warningWaterLevelDistanceInches);
-  Serial.println("");
-
-  Serial.print("Onboard LED state on power up: ");
-  Serial.println(boardLedOn);
-  Serial.println("");
-  
   
   writeEeprom();
 }
