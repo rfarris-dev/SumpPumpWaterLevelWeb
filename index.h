@@ -228,7 +228,7 @@ function send(led_sts)
       document.getElementById("state").innerHTML = this.responseText;
     }
   };
-  xhttp.open("GET", "led_set?state="+led_sts, true);
+  xhttp.open("GET", "set_led?state="+led_sts, true);
   xhttp.send();
 }
 
@@ -237,7 +237,7 @@ setInterval(function()
   getSsid()
   getDataIPAddress();
   getDataMACAddress();
-  getData();
+  getDataCm();
   getDataInch();  
   getPercentFilled();
   getDataPumpHealth();
@@ -253,7 +253,7 @@ setTimeout(function()
 }, 1300); 
 
 
-function getData() {
+function getDataCm() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -261,7 +261,7 @@ function getData() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "readcm", true);
+  xhttp.open("GET", "distance_cm", true);
   xhttp.send();
 }
 
@@ -273,7 +273,7 @@ function getDataInch() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "readin", true);
+  xhttp.open("GET", "distance_in", true);
   xhttp.send();
 }
 
@@ -303,7 +303,7 @@ function getPercentFilled() {
       }
     }
   };
-  xhttp.open("GET", "percentfilled", true);
+  xhttp.open("GET", "percent_filled", true);
   xhttp.send();
 }
 
@@ -315,7 +315,7 @@ function getDataPumpHealth() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "pumphealth", true);
+  xhttp.open("GET", "pump_health", true);
   xhttp.send();
 }
 
@@ -340,7 +340,7 @@ function getDataIPAddress() {
       this.responseText;
     } 
   };
-  xhttp.open("GET", "ipaddress", true);
+  xhttp.open("GET", "ip_address", true);
   xhttp.send();
 }
 
@@ -352,7 +352,7 @@ function getDataMACAddress() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "macaddress", true);
+  xhttp.open("GET", "mac_address", true);
   xhttp.send();
 }
 
@@ -364,7 +364,7 @@ function getBoardId() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "boardid", true);
+  xhttp.open("GET", "board_id", true);
   xhttp.send();
 }
 
@@ -376,7 +376,7 @@ function getSensorToMinWaterLevelInches() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "emptywaterleveldistanceinches", true);
+  xhttp.open("GET", "empty_water_level_distance_inches", true);
   xhttp.send();
 }
 
@@ -388,7 +388,7 @@ function getSensorToMaxWaterLevelInches() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "warningwaterleveldistanceinches", true);
+  xhttp.open("GET", "warning_water_level_distance_inches", true);
   xhttp.send();
 }
 
@@ -400,7 +400,7 @@ function getBoardLedOn() {
       this.responseText;
     }
   };
-  xhttp.open("GET", "boardledon", true);
+  xhttp.open("GET", "board_led_on", true);
   xhttp.send();
 }
 

@@ -36,7 +36,6 @@ Neotimer pushTimer = Neotimer(60000); // 60 second timer
 // Pushsafer private or alias key
 #define PushsaferKey "pjaEn9pAdlxK7nUNjCoG"
 
-/*WiFiClientSecure client;*/
 WiFiClient client;
 Pushsafer pushsafer(PushsaferKey, client);
 
@@ -63,7 +62,6 @@ void readEepromWarningWaterLevelDistanceInches()
   server.send(200, "text/plane", String(readWarningWaterLevelDistanceInches));
   warningWaterLevelDistanceInches = readWarningWaterLevelDistanceInches;
 }
-
 
 void readEepromBoardLedOn()
 {
@@ -107,7 +105,7 @@ void handleForm()
   writeEeprom();
 }
 
-void sensor_data() 
+void getSensorDataCm() 
 {
  // Clears the trigPin
   digitalWrite(trigPin, LOW);
@@ -122,11 +120,16 @@ void sensor_data()
   
   // Calculate the distance
   distanceCm = duration * SOUND_VELOCITY/2;
+
+  if(distanceCm > (emptyWaterLevelDistanceInches / 0.393701))
+  {
+    distanceCm = emptyWaterLevelDistanceInches / 0.393701; // Measurements above the maximum are erroneous.
+  }
   
   server.send(200, "text/plane", String(distanceCm));
 }
 
-void sensor_dataInch() 
+void getSensorDataInch() 
 {
   // Convert to inches
   distanceInch = distanceCm * 0.393701;
@@ -158,19 +161,18 @@ void calcPercentFilled()
 }
 
 
-void sensor_pumpHealth() 
+void checkPumpHealth()
 {
   String pumpHealth = "No issues detected.";
 
   if (distanceInch <= warningWaterLevelDistanceInches)
   {
-    pumpHealth = "PUMP FAILURE! WATER LEVEL TOO HIGH!";
+    pumpHealth = "PUMP FAILURE!";
   }
-  
   server.send(200, "text/plane", String(pumpHealth));
 }
 
-void led_control() 
+void setLed()
 {
   String state = "(OFF)";
   String act_state = server.arg("state");
@@ -246,18 +248,18 @@ void setup(void)
 
   server.on("/", handleRoot);
   server.on("/action_page", handleForm); 
-  server.on("/led_set", led_control);
-  server.on("/readcm", sensor_data);
-  server.on("/readin", sensor_dataInch);
-  server.on("/percentfilled", calcPercentFilled);
-  server.on("/pumphealth", sensor_pumpHealth);
-  server.on("/ipaddress", getIPAddress);
-  server.on("/macaddress", getMACAddress);
+  server.on("/set_led", setLed);
+  server.on("/distance_cm", getSensorDataCm);
+  server.on("/distance_in", getSensorDataInch);
+  server.on("/percent_filled", calcPercentFilled);
+  server.on("/pump_health", checkPumpHealth);
+  server.on("/ip_address", getIPAddress);
+  server.on("/mac_address", getMACAddress);
   server.on("/ssid", getSsid);
-  server.on("/boardid", readEepromBoardId);
-  server.on("/emptywaterleveldistanceinches", readEepromEmptyWaterLevelDistanceInches);
-  server.on("/warningwaterleveldistanceinches", readEepromWarningWaterLevelDistanceInches);
-  server.on("/boardledon", readEepromBoardLedOn);
+  server.on("/board_id", readEepromBoardId);
+  server.on("/empty_water_level_distance_inches", readEepromEmptyWaterLevelDistanceInches);
+  server.on("/warning_water_level_distance_inches", readEepromWarningWaterLevelDistanceInches);
+  server.on("/board_led_on", readEepromBoardLedOn);
 
   // Set Onboard LED on/off depending on user EEPROM setting
   if (boardLedOn == 1)
